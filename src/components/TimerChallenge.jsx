@@ -1,35 +1,44 @@
-import {useState} from "react";
+import { useState, useRef } from "react";
+import ResultModal from "./ResultModal.jsx";
 
 export default function TimerChallenge({ title, targetTime }) {
+  const timer = useRef();
+  const dialog = useRef();
+
   const [timerStarted, setTimerStarted] = useState(false);
   const [timerExpired, setTimerExpired] = useState(false);
 
   function handleStart() {
     setTimerStarted(true);
-    setTimeout(() => {
+    timer.current = setTimeout(() => {
       setTimerExpired(true);
+      dialog.current.showModal();
     }, targetTime * 1000);
   }
 
   function handleStop() {
-    // handleStart 함수 안에 있는 setTimeout 이 실행 되지 않도록 하는 내용을 널어야 함.
-    // 이때 ref 를 활용하여 해결 가능.
-    // 내일 이어서 ....
+    clearTimeout(timer.current);
   }
 
-  return <section className="challenge">
-    <h2>{title}</h2>
-    {timerExpired && <p>You lost!</p>}
-    <p className="challenge-time">
-      {targetTime} second{targetTime > 1 ? 's' : ''}
-    </p>
-    <p>
-      <button onClick={handleStart}>
-        {timerStarted ? 'Stop' : 'Start'} Challenge
-      </button>
-    </p>
-    <p className={timerStarted ? 'active' : undefined}>
-      {timerStarted ? 'Time is running...' : 'Timer inactive'}
-    </p>
-  </section>
+  return (
+    <>
+      {/*{timerExpired && (*/}
+        <ResultModal ref={dialog} targetTime={targetTime} result="lost" />
+      {/*)}*/}
+      <section className="challenge">
+        <h2>{title}</h2>
+         <p className="challenge-time">
+          {targetTime} second{targetTime > 1 ? 's' : ''}
+        </p>
+        <p>
+          <button onClick={timerStarted ? handleStop : handleStart}>
+            {timerStarted ? 'Stop' : 'Start'} Challenge
+          </button>
+        </p>
+        <p className={timerStarted ? 'active' : undefined}>
+          {timerStarted ? 'Time is running...' : 'Timer inactive'}
+        </p>
+      </section>
+    </>
+  );
 }
